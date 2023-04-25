@@ -5,6 +5,3 @@ cout<<"hello world"<<endl;
 
     return 0;
 }
-void helloworld(){
-    cout
-}
