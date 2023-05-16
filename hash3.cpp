@@ -5,10 +5,9 @@
 #define MAX_ITERATIONS 5000
 #define HASH_FUNC_COUNT 8
 #define unsigned int uint
+using namespace std;
 typedef struct {
-    std::vector<uint> keys;
-    std::vector<uint> values;
-    std::vector<uint> flowsize;
+    vector<uint> values;
     uint size;
 } CuckooHashTable;
 
@@ -49,9 +48,7 @@ uint hashFunc(uint key, uint size, uint hashIndex,uint flowsize) {
 
 CuckooHashTable *createHashTable(uint size) {
     CuckooHashTable *table = new CuckooHashTable;
-    table->keys.resize(size, 0);
     table->values.resize(size, 0);
-    table->flowsize.resize(size, 0);
     table->size = size;
     return table;
 }
@@ -65,11 +62,17 @@ if(){
 }
 
 }
-bool insert(CuckooHashTable *table, uint key, uint value,uint flowsize) {
+bool insert(CuckooHashTable *table, uint key, vector<uint> value) {
+    if (value.size() == 0||key==0||(find(value.begin(), value.end(),0)!=value.end())){
+        return false;
+    }
+   
+    uint valueSize = value.size();
+    value.push_back(key);
+    uint flowsize = valueSize+1;
     uint index;
     uint curr_key = key;
-    uint curr_value = value;
-    uint curr_flowsize = flowsize;
+    vector<uint> curr_value = value;
 //查询是大插小还是小插大，小插大小顺序hash，大插小小被踢出小顺序hash，判断大小的逻辑
 //添加flowsize属性在cuckoohashtable中，插入问题，查询问题，交换逻辑都要改
 //flowsize 2,4,8,16
@@ -79,7 +82,6 @@ bool insert(CuckooHashTable *table, uint key, uint value,uint flowsize) {
             if (table->keys[index] == 0) {
                 table->keys[index] = curr_key;
                 table->values[index] = curr_value;
-                table->flowsize[index] = curr_flowsize;
                 return true;
             }
             if (table->keys[index] == curr_key) {
@@ -91,8 +93,8 @@ bool insert(CuckooHashTable *table, uint key, uint value,uint flowsize) {
         //随机rand改为顺序读取hash函数(开始数随机数，后面顺序读取)
     
         index = hashFunc(curr_key, table->size, evictionIndex,flowsize);
-        std::swap(table->keys[index], curr_key);
-        std::swap(table->values[index], curr_value);
+        swap(table->keys[index], curr_key);
+        swap(table->values[index], curr_value);
     }
     return false;
 }
@@ -126,15 +128,27 @@ int main() {
 
     uint value;
     if (search(table, 15, &value)) {
-        std::cout << "Value for key 15: " << value << std::endl;
+        cout << "Value for key 15: " << value << endl;
     }
     if (search(table, 25, &value)) {
-        std::cout << "Value for key 25: " << value << std::endl;
+        cout << "Value for key 25: " << value << endl;
     }
 //输出cuckoohash的装载率
-    std::cout << "Load factor: " << loadFactor(table) << std::endl;
+    cout << "Load factor: " << loadFactor(table) << endl;
     destroyHashTable(table);
     return 0;
 }
 //每个key value对在table中所占的空间是不同的，
-//flowsize :2-16
+//flowsize :2-
+
+
+// uint function2(uint num)//经典解法
+// {
+//       uint count=0;
+//      while(num)
+//       {
+//            num=num&(num-1);
+//            count++;
+//      }
+// return count;
+// }
