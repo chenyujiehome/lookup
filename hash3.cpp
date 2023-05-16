@@ -4,39 +4,50 @@
 
 #define MAX_ITERATIONS 5000
 #define HASH_FUNC_COUNT 8
-
+#define unsigned int uint
 typedef struct {
-    std::vector<unsigned int> keys;
-    std::vector<unsigned int> values;
-    std::vector<unsigned int> flowsize;
-    int size;
+    std::vector<uint> keys;
+    std::vector<uint> values;
+    std::vector<uint> flowsize;
+    uint size;
 } CuckooHashTable;
 
-unsigned int hashFunc(unsigned int key, int size, int hashIndex,unsigned int flowsize) {
-    int nodeNum = size/flowsize +1;
+uint roundUpToNextPowerOfTwo(uint v) {
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
+}
+uint hashFunc(uint key, uint size, uint hashIndex,uint flowsize) {
+    int up = roundUpToNextPowerOfTwo(flowsize); 
+    int nodeNum = size/up;
     switch (hashIndex) {
     case 0:
-        return (key * 23) % nodeNum*flowsize;
+        return (key * 23) % nodeNum*up;
     case 1:
-        return (key * 19) % nodeNum*flowsize;
+        return (key * 19) % nodeNum*up;
     case 2:
-        return (key * 3) % nodeNum*flowsize;
+        return (key * 3) % nodeNum*up;
     case 3:
-        return (key * 5) % nodeNum*flowsize;
+        return (key * 5) % nodeNum*up;
     case 4:
-        return (key * 7) % nodeNum*flowsize;
+        return (key * 7) % nodeNum*up;
     case 5:
-        return (key * 11) % nodeNum*flowsize;
+        return (key * 11) % nodeNum*up;
     case 6:
-        return (key * 13) % nodeNum*flowsize;
+        return (key * 13) % nodeNum*up;
     case 7:
-        return (key * 17) % nodeNum*flowsize;
+        return (key * 17) % nodeNum*up;
     default:
-        return key % nodeNum*flowsize;
+        return key % nodeNum*up;
     }
 }
 
-CuckooHashTable *createHashTable(int size) {
+CuckooHashTable *createHashTable(uint size) {
     CuckooHashTable *table = new CuckooHashTable;
     table->keys.resize(size, 0);
     table->values.resize(size, 0);
@@ -48,17 +59,17 @@ CuckooHashTable *createHashTable(int size) {
 void destroyHashTable(CuckooHashTable *table) {
     delete table;
 }
-bool insertWithFlowsize(CuckooHashTable *table,unsigned int index1, unsigned int index2,unsigned int flowsize){
+bool insertWithFlowsize(CuckooHashTable *table,uint index1, uint index2,uint flowsize){
 if(){
     
 }
 
 }
-bool insert(CuckooHashTable *table, unsigned int key, unsigned int value,unsigned int flowsize) {
-    unsigned int index;
-    unsigned int curr_key = key;
-    unsigned int curr_value = value;
-    unsigned int curr_flowsize = flowsize;
+bool insert(CuckooHashTable *table, uint key, uint value,uint flowsize) {
+    uint index;
+    uint curr_key = key;
+    uint curr_value = value;
+    uint curr_flowsize = flowsize;
 //查询是大插小还是小插大，小插大小顺序hash，大插小小被踢出小顺序hash，判断大小的逻辑
 //添加flowsize属性在cuckoohashtable中，插入问题，查询问题，交换逻辑都要改
 //flowsize 2,4,8,16
@@ -86,7 +97,7 @@ bool insert(CuckooHashTable *table, unsigned int key, unsigned int value,unsigne
     return false;
 }
 
-bool search(CuckooHashTable *table, unsigned int key, unsigned int *value) {
+bool search(CuckooHashTable *table, uint key, uint *value) {
     for (int i = 0; i < HASH_FUNC_COUNT; i++) {
         int index = hashFunc(key, table->size, i);
         if (table->keys[index] == key) {
@@ -113,7 +124,7 @@ int main() {
     insert(table, 15, 20);
     insert(table, 25, 30);
 
-    unsigned int value;
+    uint value;
     if (search(table, 15, &value)) {
         std::cout << "Value for key 15: " << value << std::endl;
     }
