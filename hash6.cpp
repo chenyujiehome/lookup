@@ -145,24 +145,24 @@ double loadFactor(CuckooHashTable *table) {
     return (double)count / table->size;
 }
 
+#include <random>
+
 int main() {
     CuckooHashTable *table = createHashTable(1000000);
-    vector<uint> value = {10};
-    insert(table, 5, value);
-    value = {20};
-    insert(table, 15, value);
+    random_device rd;
+    mt19937 gen(rd());  //Standard mersenne_twister_engine seeded with rd()
+    uniform_int_distribution<uint> dis(1, 1000000);  // to generate random keys
 
-    value = {30};
-    insert(table, 25, value);
-
-    vector<uint> result;
-    if (search(table, 15, result)) {
-        cout << "Value for key 15: " << result[0] << endl;
+    int n_values = 6666;
+    for (uint valueSize = 1; valueSize <= 15; ++valueSize) {
+        for (int i = 0; i < n_values; ++i) {
+            uint key = dis(gen);
+            vector<uint> value(valueSize, dis(gen));
+            insert(table, key, value);
+        }
+ 
     }
-    if (search(table, 25, result)) {
-        cout << "Value for key 25: " << result[0] << endl;
-    }
-    cout << "Load factor: " << loadFactor(table) << endl;
+       cout << "Load factor after inserting :"  << loadFactor(table) << endl;
     destroyHashTable(table);
     return 0;
 }
