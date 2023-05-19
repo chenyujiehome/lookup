@@ -2,12 +2,19 @@
 #include <iostream>
 #include <vector>
 
-#define MAX_ITERATIONS 5000
+#define MAX_ITERATIONS 8
 #define HASH_FUNC_COUNT 8
 #define unsigned int uint
 using namespace std;
+
 typedef struct {
-    vector<uint> values;
+
+
+      uint valueSize:4;
+      uint key:28;
+} sizeKey;
+typedef struct {
+   vector<uint> keyValues;
     uint size;
 } CuckooHashTable;
 
@@ -48,7 +55,7 @@ uint hashFunc(uint key, uint size, uint hashIndex,uint flowsize) {
 
 CuckooHashTable *createHashTable(uint size) {
     CuckooHashTable *table = new CuckooHashTable;
-    table->values.resize(size, 0);
+    table->keyValues.resize(size, 0);
     table->size = size;
     return table;
 }
@@ -56,19 +63,36 @@ CuckooHashTable *createHashTable(uint size) {
 void destroyHashTable(CuckooHashTable *table) {
     delete table;
 }
-bool insertWithFlowsize(CuckooHashTable *table,uint index1, uint index2,uint flowsize){
-if(){
-    
+void preprocess(const uint& key, vector<uint>& value){//将value的size和key存入value的第一个元素中   
+sizeKey keyV;
+keyV.key=key;
+keyV.valueSize=value.size();
+value.insert(value.begin(),*((uint *)&keyV));
+return;
+}
+bool (CuckooHashTable *table,uint index,uint flowsize){
+if (table.keyValues[index]!=0){
+uint tsize=(((sizeKey)(table.keyValues[index])).valueSize)+1;
+
+if(tsize>flowsize){
+//insert next;
+}
+else if(tsize==flowsize){
+//swap and insert ;
+}
+else{
+//查询下列所有
+}
 }
 
 }
 bool insert(CuckooHashTable *table, uint key, vector<uint> value) {
+
     if (value.size() == 0||key==0||(find(value.begin(), value.end(),0)!=value.end())){
         return false;
     }
-   
+       preprocess( key,  value);
     uint valueSize = value.size();
-    value.push_back(key);
     uint flowsize = valueSize+1;
     uint index;
     uint curr_key = key;
@@ -79,8 +103,8 @@ bool insert(CuckooHashTable *table, uint key, vector<uint> value) {
     for (int i = 0; i < MAX_ITERATIONS; i++) {
         for (int j = 0; j < HASH_FUNC_COUNT; j++) {
             index = hashFunc(curr_key, table->size, j,flowsize);
-            if (table->keys[index] == 0) {
-                table->keys[index] = curr_key;
+            if (table->keyValues[index] == 0) {
+                table->keyValues[index] = curr_key;
                 table->values[index] = curr_value;
                 return true;
             }
